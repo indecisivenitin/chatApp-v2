@@ -1,31 +1,42 @@
-import express from 'express'
-import { ENV } from './lib/env.js';
-import path from 'path'
-import cookieParser from 'cookie-parser'
-import authRoutes from './routes/auth.route.js';
-import messageRoutes from './routes/message.route.js';
-import { connectDB } from './lib/db.js';
+import express from "express";
+import cookieParser from "cookie-parser";
+import path from "path";
+import cors from "cors";
 
+import authRoutes from "./routes/auth.route.js";
+import messageRoutes from "./routes/message.route.js";
+import stickerRoutes from "./routes/sticker.route.js";
 
+import { connectDB } from "./lib/db.js";
+import { ENV } from "./lib/env.js";
+import { app, server } from "./lib/socket.js";
 
-const app = express()
-const __dirname =path.resolve()
+const __dirname = path.resolve();
 
-app.use(express.json())
-app.use(cookieParser())
+const PORT = ENV.PORT || 3000;
 
-app.use('/api/auth', authRoutes)
-app.use('/api/messages', messageRoutes)
+app.use(express.json({ limit: "5mb" })); // req.body
+app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
+app.use(cookieParser());
+app.use(
+  "/uploads",
+  express.static(path.join(process.cwd(), "uploads"))
+);
+app.use("/api/stickers", stickerRoutes);
 
-if(ENV.NODE_ENV === 'production'){
-    app.use(express.static(path.join(__dirname, '../frontend/dist')))
+app.use("/api/auth", authRoutes);
+app.use("/api/messages", messageRoutes);
 
-    app.get('*',(_,res)=>{
-        res.sendFile(path.join(__dirname, '../frontend/dist/index.html'))
-    })
+// make ready for deployment
+if (ENV.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+  app.get("*", (_, res) => {
+    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+  });
 }
 
-app.listen(process.env.PORT, ()=>{
-    console.log("server is running on port:" + ENV.PORT )
-    connectDB()
-})
+server.listen(PORT, () => {
+  console.log("Server running on port: " + PORT);
+  connectDB();
+});
