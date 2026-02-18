@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import { socket } from "../lib/socket";
+import { useAuthStore } from "./useAuthStore";
+
 
 export const useChatStore = create((set, get) => ({
   /* ===================== UI STATE ===================== */
