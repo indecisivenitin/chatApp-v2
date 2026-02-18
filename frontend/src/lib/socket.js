@@ -1,11 +1,5 @@
 import { io } from "socket.io-client";
 
-export const socket = io(
-  import.meta.env.MODE === "development"
-    ? "http://localhost:3000"
-    : "/",
-  {
-    withCredentials: true,
-    autoConnect: true,
-  }
-);
+export const socket = io("https://chatapp-v2-0r6l.onrender.com", {
+  withCredentials: true,
+});
