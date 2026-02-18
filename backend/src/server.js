@@ -16,7 +16,8 @@ const __dirname = path.resolve();
 const PORT = ENV.PORT || 3000;
 app.set("trust proxy", 1);
 app.use(express.json({ limit: "5mb" })); // req.body
-app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
+app.use(cors({ origin: ["https://chat-app-v2-olive.vercel.app",
+    "https://chat-app-v2-h7yd60nct-nitins-projects-e996c1dd.vercel.app"], credentials: true }));
 app.use(cookieParser());
 app.use(
   "/uploads",
