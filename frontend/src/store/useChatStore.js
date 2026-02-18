@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import { socket } from "../lib/socket";
+import { useAuthStore } from "./useAuthStore";
 
 export const useChatStore = create((set, get) => ({
   /* ===================== UI STATE ===================== */
@@ -64,12 +65,14 @@ export const useChatStore = create((set, get) => ({
       set({ isMessagesLoading: false });
     }
   },
+sendMessage: async ({ receiverId, content, type }) => {
+  const { replyMessage } = get();
+  const authUser = useAuthStore.getState().authUser;
 
-  sendMessage: async ({ receiverId, content, type }) => {
-  const { replyMessage, authUser } = get();
+  if (!authUser) return;
 
   const tempMessage = {
-    _id: crypto.randomUUID(), // temp id
+    _id: crypto.randomUUID(),
     senderId: authUser._id,
     receiverId,
     content,
@@ -79,6 +82,23 @@ export const useChatStore = create((set, get) => ({
     isDeleted: false,
     pending: true,
   };
+
+  set((state) => ({
+    messages: [...state.messages, tempMessage],
+    replyMessage: null,
+  }));
+
+  try {
+    await axiosInstance.post(`/messages/send/${receiverId}`, {
+      content,
+      type,
+      replyTo: replyMessage?._id || null,
+    });
+  } catch (err) {
+    console.error("Send message error:", err);
+  }
+},
+
 
   // 🔥 OPTIMISTIC UI UPDATE
   set((state) => ({
