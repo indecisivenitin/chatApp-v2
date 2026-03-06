@@ -28,6 +28,9 @@ app.use("/api/stickers", stickerRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
+app.get("/ping", (req,res)=>{
+    res.send("chat app is working");
+};
 
 
 server.listen(PORT, () => {
